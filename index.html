@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Sony Challenge&mdash;by: Christopher "Cricket" Wallace</title>
+</head>
+<style>
+	body {
+		background-color: #ddd;
+	}
+
+	#wrapper {
+		border-radius: 4px;
+		max-width: 80%;
+		height: 100%;
+		margin: 10px auto;
+		background-color: #FFF;
+	}
+
+	.panel {
+		padding: 2em;
+	}
+
+	#search-panel {
+		padding: 20px 10px 10px 10px;
+		border-bottom: 1px solid #F00;
+	}
+	#results-count {
+		display: inline-block;
+		float: left;
+	}
+	#results-page-controls {
+		display: inline-block;
+		float: right;
+	}
+	#results-list {
+		padding-left: 0px;
+		list-style: none;
+		margin: 3em 0em;
+	}
+
+	#results-list li {
+		margin-bottom: 1.5em;
+	}
+
+	#results-list div:first-of-type {
+		/*width: 150px;*/
+		/*float: left;*/
+	}
+	#results-list div:last-of-type {
+	/*	width: 150px;
+		height: 100%;*/
+		/*float: right;*/
+	}
+	
+	#results-list div img {
+		width: 150px;
+		margin: 0em 1em 1em 0em;
+		/*float: left;*/
+	}
+	#results-list p {}
+	#results-list p:first-of-type {
+		font-weight: bold;
+		font-size: 1.5em;
+		margin-bottom: 0.5em;
+	}
+	#results-list p span { font-style: italic; }
+
+</style>
+<script type="text/javascript">
+	function KrakenSearchApp(id){
+		this.root = document.getElementById(id)
+		this.searchRoot = 'https://api.twitch.tv/kraken/search/streams'
+		this.init()		
+	}
+
+	KrakenSearchApp.prototype.init = function(){
+		console.log("init")
+		this.buildSearchBar()
+		this.buildResultsPanelContainer();
+	}
+	
+	KrakenSearchApp.prototype.buildSearchBar = function(){
+		var textFragment = '<input id="input-search" type="text" placeholder="Search query..." /><input type="submit" value="Search" />'
+		
+		var attrClass = document.createAttribute("class")
+		attrClass.value = "panel"
+		var attrId = document.createAttribute("id")
+		attrId.value = "search-panel"
+		var HTMLfragment = document.createDocumentFragment();
+		HTMLfragment.appendChild(document.createElement('DIV'))
+		HTMLfragment.childNodes[0].setAttributeNode(attrId)
+		HTMLfragment.childNodes[0].setAttributeNode(attrClass)
+		
+		HTMLfragment.childNodes[0].innerHTML = textFragment
+		this.root.appendChild(HTMLfragment)
+
+		this.setSearchListeners()
+	}
+
+	KrakenSearchApp.prototype.setSearchListeners = function(){
+		document.getElementById('input-search').addEventListener('keyup', this.searchHandler, true)
+	}
+
+	KrakenSearchApp.prototype.searchHandler = function(event){
+		console.log("handling: ", event.target.value)
+		KrakenSearchApp.prototype.searchAPI.call(KrakenSearchApp, event.target.value)
+		
+	}
+
+	KrakenSearchApp.prototype.searchAPI = function(term){
+		//Ajax call to twitch with 'term'
+		console.log('searching...')
+		var queryURL = this.searchRoot + '?q="' + encodeURI(term) + '"'
+		var server = new AsyncModule()
+		/*the following object literal is not good becasue I'm explictly referencing a instance 
+		of the KrakenSearchApp() at the 'scope' key. This is a hack/patch to get the demo to work. This app is MEGA brittle now and I don't know how 
+		to fix it */
+		var config = {
+			scope: app,
+			callback: KrakenSearchApp.prototype.displaySearchResults,
+			arguments: ['results-list']
+		}
+		console.log(this)
+		server.load(queryURL, config)
+		//this.displaySearchResults('results-list', data) //NOT A CALLBACK!!!!
+	}
+
+	KrakenSearchApp.prototype.displaySearchResults = function(parentId, data){
+		console.log('pid: ', parentId, 'data: ', data)
+		//loop through data and add a 'li' node to the parent for each stream object
+		var parent = document.getElementById(parentId)
+		parent.innerHTML = null   //Need to implment a function to empty the DOM node
+		data.streams.forEach(function(stream){
+			var textFragment = '<div><img src="' + stream.channel.logo+ '" /></div><div><p>' + stream.channel.status + '</p><p><span>' + stream.game + '</span> - <span>' + stream.viewers + ' viewers</span></p></div>'
+			var HTMLfragment = document.createDocumentFragment();
+			HTMLfragment.appendChild(document.createElement('LI'))
+			HTMLfragment.childNodes[0].innerHTML = textFragment
+			parent.appendChild(HTMLfragment)
+		})
+		// need to update pagination
+		this.updateResultsCount(data._total)
+
+	}
+
+	KrakenSearchApp.prototype.updateResultsCount = function(newCount){
+		var counterDisplayNode = document.getElementById('results-count').childNodes[1]
+		counterDisplayNode.innerHTML = newCount
+	}
+
+	KrakenSearchApp.prototype.buildResultsPanelContainer = function(){
+		//var textFragment = '<input id="input-search" type="text" placeholder="Search query..." /><input type="submit" value="Search" />'
+		
+		var attrClass = document.createAttribute("class")
+		attrClass.value = "panel"
+		var attrId = document.createAttribute("id")
+		attrId.value = "results-panel"
+		var HTMLfragment = document.createDocumentFragment();
+		HTMLfragment.appendChild(document.createElement('DIV'))
+		HTMLfragment.childNodes[0].setAttributeNode(attrId)
+		HTMLfragment.childNodes[0].setAttributeNode(attrClass)
+		
+		//HTMLfragment.childNodes[0].innerHTML = textFragment
+		this.root.appendChild(HTMLfragment)
+		this.buildResultsCountTemplate(attrId.value)
+		this.buildResultsPageControlsTemplate(attrId.value)
+		this.buildResultsListTemplate(attrId.value)
+	}
+
+	KrakenSearchApp.prototype.buildResultsCountTemplate = function(parentId){
+		var textFragment = '<span>Total results: </span><span>123</span>'
+		
+		var parent = document.getElementById(parentId)
+		var attrId = document.createAttribute("id")
+		attrId.value = "results-count"
+		var HTMLfragment = document.createDocumentFragment();
+		HTMLfragment.appendChild(document.createElement('DIV'))
+		HTMLfragment.childNodes[0].setAttributeNode(attrId)
+		
+		HTMLfragment.childNodes[0].innerHTML = textFragment
+		parent.appendChild(HTMLfragment)
+	}
+
+	KrakenSearchApp.prototype.buildResultsPageControlsTemplate = function(parentId, currentPage, maxPage, interval){
+		var textFragment = '<a href="#"><span>&#8676;</span></a><a href="#"><span>&#8678;</span></a><span>1/20</span><a href="#"><span>&#8680;</span></a><a href="#"><span>&#8677;</span></a>'
+		
+		var parent = document.getElementById(parentId)
+		var attrId = document.createAttribute("id")
+		attrId.value = "results-page-controls"
+		var HTMLfragment = document.createDocumentFragment();
+		HTMLfragment.appendChild(document.createElement('DIV'))
+		HTMLfragment.childNodes[0].setAttributeNode(attrId)
+		
+		HTMLfragment.childNodes[0].innerHTML = textFragment
+		parent.appendChild(HTMLfragment)
+	}
+
+	KrakenSearchApp.prototype.buildResultsListTemplate = function(parentId){
+		var parent = document.getElementById(parentId)
+		var attrId = document.createAttribute("id")
+		attrId.value = "results-list"
+		var HTMLfragment = document.createDocumentFragment();
+		HTMLfragment.appendChild(document.createElement('UL'))
+		HTMLfragment.childNodes[0].setAttributeNode(attrId)
+		
+		parent.appendChild(HTMLfragment)
+	}
+
+	AsyncModule = function(){
+		var xhr = new XMLHttpRequest()
+
+		function STUBload(url, options){
+			if(options.callback){
+				options.arguments ? options.arguments.push(STUBDATA) : null
+				options.callback.apply(options.scope, options.arguments)
+			}
+		}
+
+		function get(url){
+			xhr.open('get', url)
+			 
+			xhr.onreadystatechange = function(){
+			    if(xhr.readyState === 4){
+			        if(xhr.status === 200){
+			        	return xhr.responseText
+			        } else {
+			            alert('Error: '+ xhr.status)
+			        }
+			    }
+			}
+			 
+			xhr.send(null)	
+		}
+
+		function load(url, options){
+			xhr.open('get', url)
+			 
+			xhr.onreadystatechange = function(){
+			    if(xhr.readyState === 4){
+			        if(xhr.status === 200){
+			        	if(options.callback){
+							options.arguments ? options.arguments.push(JSON.parse(xhr.responseText)) : null
+							options.callback.apply(options.scope, options.arguments)
+						}
+			        	return JSON.parse(xhr.responseText)
+			        } else {
+			            alert('Error: '+ xhr.status)
+			        }
+			    }
+			}
+			 
+			xhr.send(null)				
+		}
+
+		return {
+			load: load,
+			get: get
+		}
+	}
+
+	
+	window.onload = function(){
+		// new KrakenSearchApp()
+		app = new KrakenSearchApp('wrapper')
+	}
+
+
+	var STUBDATA = {
+	  "_total": 5,
+	  "_links": {
+	    "self": "https://api.twitch.tv/kraken/search/streams?limit=25&offset=0&q=starcraft",
+	    "next": "https://api.twitch.tv/kraken/search/streams?limit=25&offset=25&q=starcraft"
+	  },
+	  "streams": [
+	    {
+	      "game": "StarCraft II: Heart of the Swarm",
+	      "viewers": 2,
+	      "_id": 4989654544,
+	      "channel": {
+	        "game": "StarCraft II: Heart of the Swarm",
+	        "display_name": "Blade55555",
+	        "created_at": "2009-09-19T02:07:23Z",
+	        "status": "Starcraft 2 HOTS GM zerg",
+	        "updated_at": "2013-02-28T22:30:17Z",
+	        "mature": null,
+	        "_id": 8341905,
+	        "video_banner": "http://static-cdn.jtvnw.net/jtv_user_pictures/blade55555-channel_offline_image-3abeffa573a391d4-640x360.jpeg",
+	        "name": "blade55555",
+	        "banner": null,
+	        "background": null,
+	        "_links": {
+	          "editors": "https://api.twitch.tv/kraken/channels/blade55555/editors",
+	          "stream_key": "https://api.twitch.tv/kraken/channels/blade55555/stream_key",
+	          "commercial": "https://api.twitch.tv/kraken/channels/blade55555/commercial",
+	          "features": "https://api.twitch.tv/kraken/channels/blade55555/features",
+	          "videos": "https://api.twitch.tv/kraken/channels/blade55555/videos",
+	          "subscriptions": "https://api.twitch.tv/kraken/channels/blade55555/subscriptions",
+	          "follows": "https://api.twitch.tv/kraken/channels/blade55555/follows",
+	          "self": "https://api.twitch.tv/kraken/channels/blade55555",
+	          "chat": "https://api.twitch.tv/kraken/chat/blade55555"
+	        },
+	        "teams": [ ],
+	        "logo": "http://static-cdn.jtvnw.net/jtv_user_pictures/blade55555-profile_image-e551610be15ec896-300x300.png",
+	        "url": "http://www.twitch.tv/blade55555"
+	      },
+	      "preview": "http://static-cdn.jtvnw.net/previews-ttv/live_user_blade55555-320x200.jpg",
+	      "name": "live_user_blade55555",
+	      "_links": {
+	        "self": "https://api.twitch.tv/kraken/streams/blade55555"
+	      },
+	      "broadcaster": "fme"
+	    },
+	    {
+	      "game": "StarCraft II: Heart of the Swarm",
+	      "viewers": 2,
+	      "_id": 4989654544,
+	      "channel": {
+	        "game": "StarCraft II: Heart of the Swarm",
+	        "display_name": "Blade55555",
+	        "created_at": "2009-09-19T02:07:23Z",
+	        "status": "Starcraft 2 HOTS GM zerg",
+	        "updated_at": "2013-02-28T22:30:17Z",
+	        "mature": null,
+	        "_id": 8341905,
+	        "video_banner": "http://static-cdn.jtvnw.net/jtv_user_pictures/blade55555-channel_offline_image-3abeffa573a391d4-640x360.jpeg",
+	        "name": "blade55555",
+	        "banner": null,
+	        "background": null,
+	        "_links": {
+	          "editors": "https://api.twitch.tv/kraken/channels/blade55555/editors",
+	          "stream_key": "https://api.twitch.tv/kraken/channels/blade55555/stream_key",
+	          "commercial": "https://api.twitch.tv/kraken/channels/blade55555/commercial",
+	          "features": "https://api.twitch.tv/kraken/channels/blade55555/features",
+	          "videos": "https://api.twitch.tv/kraken/channels/blade55555/videos",
+	          "subscriptions": "https://api.twitch.tv/kraken/channels/blade55555/subscriptions",
+	          "follows": "https://api.twitch.tv/kraken/channels/blade55555/follows",
+	          "self": "https://api.twitch.tv/kraken/channels/blade55555",
+	          "chat": "https://api.twitch.tv/kraken/chat/blade55555"
+	        },
+	        "teams": [ ],
+	        "logo": "http://static-cdn.jtvnw.net/jtv_user_pictures/blade55555-profile_image-e551610be15ec896-300x300.png",
+	        "url": "http://www.twitch.tv/blade55555"
+	      },
+	      "preview": "http://static-cdn.jtvnw.net/previews-ttv/live_user_blade55555-320x200.jpg",
+	      "name": "live_user_blade55555",
+	      "_links": {
+	        "self": "https://api.twitch.tv/kraken/streams/blade55555"
+	      },
+	      "broadcaster": "fme"
+	    },
+	    {
+	      "game": "StarCraft II: Heart of the Swarm",
+	      "viewers": 2,
+	      "_id": 4989654544,
+	      "channel": {
+	        "game": "StarCraft II: Heart of the Swarm",
+	        "display_name": "Blade55555",
+	        "created_at": "2009-09-19T02:07:23Z",
+	        "status": "Starcraft 2 HOTS GM zerg",
+	        "updated_at": "2013-02-28T22:30:17Z",
+	        "mature": null,
+	        "_id": 8341905,
+	        "video_banner": "http://static-cdn.jtvnw.net/jtv_user_pictures/blade55555-channel_offline_image-3abeffa573a391d4-640x360.jpeg",
+	        "name": "blade55555",
+	        "banner": null,
+	        "background": null,
+	        "_links": {
+	          "editors": "https://api.twitch.tv/kraken/channels/blade55555/editors",
+	          "stream_key": "https://api.twitch.tv/kraken/channels/blade55555/stream_key",
+	          "commercial": "https://api.twitch.tv/kraken/channels/blade55555/commercial",
+	          "features": "https://api.twitch.tv/kraken/channels/blade55555/features",
+	          "videos": "https://api.twitch.tv/kraken/channels/blade55555/videos",
+	          "subscriptions": "https://api.twitch.tv/kraken/channels/blade55555/subscriptions",
+	          "follows": "https://api.twitch.tv/kraken/channels/blade55555/follows",
+	          "self": "https://api.twitch.tv/kraken/channels/blade55555",
+	          "chat": "https://api.twitch.tv/kraken/chat/blade55555"
+	        },
+	        "teams": [ ],
+	        "logo": "http://static-cdn.jtvnw.net/jtv_user_pictures/blade55555-profile_image-e551610be15ec896-300x300.png",
+	        "url": "http://www.twitch.tv/blade55555"
+	      },
+	      "preview": "http://static-cdn.jtvnw.net/previews-ttv/live_user_blade55555-320x200.jpg",
+	      "name": "live_user_blade55555",
+	      "_links": {
+	        "self": "https://api.twitch.tv/kraken/streams/blade55555"
+	      },
+	      "broadcaster": "fme"
+	    },
+	    {
+	      "game": "StarCraft II: Heart of the Swarm",
+	      "viewers": 2,
+	      "_id": 4989654544,
+	      "channel": {
+	        "game": "StarCraft II: Heart of the Swarm",
+	        "display_name": "Blade55555",
+	        "created_at": "2009-09-19T02:07:23Z",
+	        "status": "Starcraft 2 HOTS GM zerg",
+	        "updated_at": "2013-02-28T22:30:17Z",
+	        "mature": null,
+	        "_id": 8341905,
+	        "video_banner": "http://static-cdn.jtvnw.net/jtv_user_pictures/blade55555-channel_offline_image-3abeffa573a391d4-640x360.jpeg",
+	        "name": "blade55555",
+	        "banner": null,
+	        "background": null,
+	        "_links": {
+	          "editors": "https://api.twitch.tv/kraken/channels/blade55555/editors",
+	          "stream_key": "https://api.twitch.tv/kraken/channels/blade55555/stream_key",
+	          "commercial": "https://api.twitch.tv/kraken/channels/blade55555/commercial",
+	          "features": "https://api.twitch.tv/kraken/channels/blade55555/features",
+	          "videos": "https://api.twitch.tv/kraken/channels/blade55555/videos",
+	          "subscriptions": "https://api.twitch.tv/kraken/channels/blade55555/subscriptions",
+	          "follows": "https://api.twitch.tv/kraken/channels/blade55555/follows",
+	          "self": "https://api.twitch.tv/kraken/channels/blade55555",
+	          "chat": "https://api.twitch.tv/kraken/chat/blade55555"
+	        },
+	        "teams": [ ],
+	        "logo": "http://static-cdn.jtvnw.net/jtv_user_pictures/blade55555-profile_image-e551610be15ec896-300x300.png",
+	        "url": "http://www.twitch.tv/blade55555"
+	      },
+	      "preview": "http://static-cdn.jtvnw.net/previews-ttv/live_user_blade55555-320x200.jpg",
+	      "name": "live_user_blade55555",
+	      "_links": {
+	        "self": "https://api.twitch.tv/kraken/streams/blade55555"
+	      },
+	      "broadcaster": "fme"
+	    },
+	    {
+	      "game": "StarCraft II: Heart of the Swarm",
+	      "viewers": 2,
+	      "_id": 4989654544,
+	      "channel": {
+	        "game": "StarCraft II: Heart of the Swarm",
+	        "display_name": "Blade55555",
+	        "created_at": "2009-09-19T02:07:23Z",
+	        "status": "Starcraft 2 HOTS GM zerg",
+	        "updated_at": "2013-02-28T22:30:17Z",
+	        "mature": null,
+	        "_id": 8341905,
+	        "video_banner": "http://static-cdn.jtvnw.net/jtv_user_pictures/blade55555-channel_offline_image-3abeffa573a391d4-640x360.jpeg",
+	        "name": "blade55555",
+	        "banner": null,
+	        "background": null,
+	        "_links": {
+	          "editors": "https://api.twitch.tv/kraken/channels/blade55555/editors",
+	          "stream_key": "https://api.twitch.tv/kraken/channels/blade55555/stream_key",
+	          "commercial": "https://api.twitch.tv/kraken/channels/blade55555/commercial",
+	          "features": "https://api.twitch.tv/kraken/channels/blade55555/features",
+	          "videos": "https://api.twitch.tv/kraken/channels/blade55555/videos",
+	          "subscriptions": "https://api.twitch.tv/kraken/channels/blade55555/subscriptions",
+	          "follows": "https://api.twitch.tv/kraken/channels/blade55555/follows",
+	          "self": "https://api.twitch.tv/kraken/channels/blade55555",
+	          "chat": "https://api.twitch.tv/kraken/chat/blade55555"
+	        },
+	        "teams": [ ],
+	        "logo": "http://static-cdn.jtvnw.net/jtv_user_pictures/blade55555-profile_image-e551610be15ec896-300x300.png",
+	        "url": "http://www.twitch.tv/blade55555"
+	      },
+	      "preview": "http://static-cdn.jtvnw.net/previews-ttv/live_user_blade55555-320x200.jpg",
+	      "name": "live_user_blade55555",
+	      "_links": {
+	        "self": "https://api.twitch.tv/kraken/streams/blade55555"
+	      },
+	      "broadcaster": "fme"
+	    }
+
+	  ]
+	}
+//http://character-code.com/arrows-html-codes.php
+</script>
+<body id="root">
+ <div id="wrapper">
+ 	<!--
+ 	<div id='results-panel' class="panel">
+ 		<div id="results-count">
+ 			<span>Total results: </span><span>123</span>
+ 		</div>
+ 		<div id="results-page-controls">
+ 			<a href="#"><span>&#8676;</span></a>
+ 			<a href="#"><span>&#8678;</span></a>
+ 			<span>1/20</span>
+ 			<a href="#"><span>&#8680;</span></a>
+ 			<a href="#"><span>&#8677;</span></a>
+ 		</div>
+ 		<ul id="results-list">
+ 			<li>
+ 				<div><img src="http://static-cdn.jtvnw.net/previews-ttv/live_user_vinesauce-320x200.jpg" /></div>
+ 				<div>
+	 				<p>(channel.status) Stream display name</p>
+	 				<p><span>(game) Super Mario RPG: Legend of the Seven Stars</span> - <span> (viewers) 659 viewers</span></p>
+	 				<p>Stream description Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus faucibus magna eget blandit mattis. Duis pretium ante sed luctus lacinia. Suspendisse sit amet mi sed nisl cursus auctor. Etiam semper mauris sit amet turpis elementum semper. Cras ut magna ut justo sagittis imperdiet.</p>
+ 				</div>
+ 			</li>
+ 			<li>
+ 				<div><img src="http://static-cdn.jtvnw.net/previews-ttv/live_user_vinesauce-320x200.jpg" /></div>
+ 				<div>
+	 				<p>(channel.status) Stream display name</p>
+	 				<p><span>(game) Super Mario RPG: Legend of the Seven Stars</span> - <span> (viewers) 659 viewers</span></p>
+	 				<p>Stream description Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus faucibus magna eget blandit mattis. Duis pretium ante sed luctus lacinia. Suspendisse sit amet mi sed nisl cursus auctor. Etiam semper mauris sit amet turpis elementum semper. Cras ut magna ut justo sagittis imperdiet.</p>
+ 				</div>
+ 			</li>
+ 			<li>
+ 				<div><img src="http://static-cdn.jtvnw.net/previews-ttv/live_user_vinesauce-320x200.jpg" /></div>
+ 				<div>
+	 				<p>(channel.status) Stream display name</p>
+	 				<p><span>(game) Super Mario RPG: Legend of the Seven Stars</span> - <span> (viewers) 659 viewers</span></p>
+	 				<p>Stream description Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus faucibus magna eget blandit mattis. Duis pretium ante sed luctus lacinia. Suspendisse sit amet mi sed nisl cursus auctor. Etiam semper mauris sit amet turpis elementum semper. Cras ut magna ut justo sagittis imperdiet.</p>
+ 				</div>
+ 			</li>
+
+ 		</ul>
+ 	</div>
+	!-->
+ </div>
+</body>
+</html>
