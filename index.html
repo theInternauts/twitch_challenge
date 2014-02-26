@@ -124,14 +124,13 @@
 	}
 
 	KrakenSearchApp.prototype.displaySearchResults = function(parentId, data){
-		console.log('pid: ', parentId, 'data: ', data)
-		//loop through data and add a 'li' node to the parent for each stream object
 		var parent = document.getElementById(parentId)
-		//parent.innerHTML = null   
-		//Need to implment a function to empty the DOM node
+		
+		//Need to seperate these concerns by implmenting this while loop as utility function to empty the parent node and make it testable
 		while (parent.hasChildren) {
 		    myNode.removeChild(myNode.lastChild);
 		}
+
 		data.streams.forEach(function(stream){
 			var textFragment = '<div><img src="' + stream.channel.logo+ '" /></div><div><p>' + stream.channel.status + '</p><p><span>' + stream.game + '</span> - <span>' + stream.viewers + ' viewers</span></p></div>'
 			var HTMLfragment = document.createDocumentFragment();
@@ -148,9 +147,7 @@
 		counterDisplayNode.innerHTML = newCount
 	}
 
-	KrakenSearchApp.prototype.buildResultsPanelContainer = function(){
-		//var textFragment = '<input id="input-search" type="text" placeholder="Search query..." /><input type="submit" value="Search" />'
-		
+	KrakenSearchApp.prototype.buildResultsPanelContainer = function(){		
 		var attrClass = document.createAttribute("class")
 		attrClass.value = "panel"
 		var attrId = document.createAttribute("id")
@@ -160,10 +157,9 @@
 		HTMLfragment.childNodes[0].setAttributeNode(attrId)
 		HTMLfragment.childNodes[0].setAttributeNode(attrClass)
 		
-		//HTMLfragment.childNodes[0].innerHTML = textFragment
 		this.root.appendChild(HTMLfragment)
 		this.buildResultsCountTemplate(attrId.value)
-		this.buildResultsPageControlsTemplate(attrId.value)
+		//this.buildResultsPageControlsTemplate(attrId.value)
 		this.buildResultsListTemplate(attrId.value)
 	}
 
@@ -253,7 +249,7 @@
 		}
 
 		return {
-			load: STUBload,
+			load: load,
 			get: get
 		}
 	}
@@ -262,8 +258,6 @@
 		// new KrakenSearchApp('wrapper')
 		app = new KrakenSearchApp('wrapper')
 	}
-
-//http://character-code.com/arrows-html-codes.php
 </script>
 <body id="root">
  <div id="wrapper">
