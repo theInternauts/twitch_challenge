@@ -66,10 +66,10 @@
 	#results-list p span { font-style: italic; }
 
 </style>
+<script type="text/javascript" src="fakeData.js"></script>
 <script type="text/javascript">
 	function KrakenSearchApp(id){
 		this.root = document.getElementById(id)
-		this.searchRoot = 'https://api.twitch.tv/kraken/search/streams'
 		this.init()		
 	}
 
@@ -102,15 +102,13 @@
 	}
 
 	KrakenSearchApp.prototype.searchHandler = function(event){
-		console.log("handling: ", event.target.value)
-		KrakenSearchApp.prototype.searchAPI.call(KrakenSearchApp, event.target.value)
-		
+		KrakenSearchApp.prototype.searchAPI.call(KrakenSearchApp, event.target.value)		
 	}
 
 	KrakenSearchApp.prototype.searchAPI = function(term){
-		//Ajax call to twitch with 'term'
-		console.log('searching...')
-		var queryURL = this.searchRoot + '?q="' + encodeURI(term) + '"'
+		var baseURL = 'https://api.twitch.tv/kraken/search/streams'
+		var queryURL = baseURL + '?q="' + encodeURI(term) + '"'
+		console.log(queryURL)
 		var server = new AsyncModule()
 		/*the following object literal is not good becasue I'm explictly referencing a instance 
 		of the KrakenSearchApp() at the 'scope' key. This is a hack/patch to get the demo to work. This app is MEGA brittle now and I don't know how 
@@ -120,16 +118,20 @@
 			callback: KrakenSearchApp.prototype.displaySearchResults,
 			arguments: ['results-list']
 		}
-		console.log(this)
+		
+		//Asyc call to twitch with 'term'
 		server.load(queryURL, config)
-		//this.displaySearchResults('results-list', data) //NOT A CALLBACK!!!!
 	}
 
 	KrakenSearchApp.prototype.displaySearchResults = function(parentId, data){
 		console.log('pid: ', parentId, 'data: ', data)
 		//loop through data and add a 'li' node to the parent for each stream object
 		var parent = document.getElementById(parentId)
-		parent.innerHTML = null   //Need to implment a function to empty the DOM node
+		//parent.innerHTML = null   
+		//Need to implment a function to empty the DOM node
+		while (parent.hasChildren) {
+		    myNode.removeChild(myNode.lastChild);
+		}
 		data.streams.forEach(function(stream){
 			var textFragment = '<div><img src="' + stream.channel.logo+ '" /></div><div><p>' + stream.channel.status + '</p><p><span>' + stream.game + '</span> - <span>' + stream.viewers + ' viewers</span></p></div>'
 			var HTMLfragment = document.createDocumentFragment();
@@ -137,9 +139,8 @@
 			HTMLfragment.childNodes[0].innerHTML = textFragment
 			parent.appendChild(HTMLfragment)
 		})
-		// need to update pagination
+		
 		this.updateResultsCount(data._total)
-
 	}
 
 	KrakenSearchApp.prototype.updateResultsCount = function(newCount){
@@ -252,263 +253,21 @@
 		}
 
 		return {
-			load: load,
+			load: STUBload,
 			get: get
 		}
 	}
-
 	
 	window.onload = function(){
-		// new KrakenSearchApp()
+		// new KrakenSearchApp('wrapper')
 		app = new KrakenSearchApp('wrapper')
 	}
 
-
-	var STUBDATA = {
-	  "_total": 5,
-	  "_links": {
-	    "self": "https://api.twitch.tv/kraken/search/streams?limit=25&offset=0&q=starcraft",
-	    "next": "https://api.twitch.tv/kraken/search/streams?limit=25&offset=25&q=starcraft"
-	  },
-	  "streams": [
-	    {
-	      "game": "StarCraft II: Heart of the Swarm",
-	      "viewers": 2,
-	      "_id": 4989654544,
-	      "channel": {
-	        "game": "StarCraft II: Heart of the Swarm",
-	        "display_name": "Blade55555",
-	        "created_at": "2009-09-19T02:07:23Z",
-	        "status": "Starcraft 2 HOTS GM zerg",
-	        "updated_at": "2013-02-28T22:30:17Z",
-	        "mature": null,
-	        "_id": 8341905,
-	        "video_banner": "http://static-cdn.jtvnw.net/jtv_user_pictures/blade55555-channel_offline_image-3abeffa573a391d4-640x360.jpeg",
-	        "name": "blade55555",
-	        "banner": null,
-	        "background": null,
-	        "_links": {
-	          "editors": "https://api.twitch.tv/kraken/channels/blade55555/editors",
-	          "stream_key": "https://api.twitch.tv/kraken/channels/blade55555/stream_key",
-	          "commercial": "https://api.twitch.tv/kraken/channels/blade55555/commercial",
-	          "features": "https://api.twitch.tv/kraken/channels/blade55555/features",
-	          "videos": "https://api.twitch.tv/kraken/channels/blade55555/videos",
-	          "subscriptions": "https://api.twitch.tv/kraken/channels/blade55555/subscriptions",
-	          "follows": "https://api.twitch.tv/kraken/channels/blade55555/follows",
-	          "self": "https://api.twitch.tv/kraken/channels/blade55555",
-	          "chat": "https://api.twitch.tv/kraken/chat/blade55555"
-	        },
-	        "teams": [ ],
-	        "logo": "http://static-cdn.jtvnw.net/jtv_user_pictures/blade55555-profile_image-e551610be15ec896-300x300.png",
-	        "url": "http://www.twitch.tv/blade55555"
-	      },
-	      "preview": "http://static-cdn.jtvnw.net/previews-ttv/live_user_blade55555-320x200.jpg",
-	      "name": "live_user_blade55555",
-	      "_links": {
-	        "self": "https://api.twitch.tv/kraken/streams/blade55555"
-	      },
-	      "broadcaster": "fme"
-	    },
-	    {
-	      "game": "StarCraft II: Heart of the Swarm",
-	      "viewers": 2,
-	      "_id": 4989654544,
-	      "channel": {
-	        "game": "StarCraft II: Heart of the Swarm",
-	        "display_name": "Blade55555",
-	        "created_at": "2009-09-19T02:07:23Z",
-	        "status": "Starcraft 2 HOTS GM zerg",
-	        "updated_at": "2013-02-28T22:30:17Z",
-	        "mature": null,
-	        "_id": 8341905,
-	        "video_banner": "http://static-cdn.jtvnw.net/jtv_user_pictures/blade55555-channel_offline_image-3abeffa573a391d4-640x360.jpeg",
-	        "name": "blade55555",
-	        "banner": null,
-	        "background": null,
-	        "_links": {
-	          "editors": "https://api.twitch.tv/kraken/channels/blade55555/editors",
-	          "stream_key": "https://api.twitch.tv/kraken/channels/blade55555/stream_key",
-	          "commercial": "https://api.twitch.tv/kraken/channels/blade55555/commercial",
-	          "features": "https://api.twitch.tv/kraken/channels/blade55555/features",
-	          "videos": "https://api.twitch.tv/kraken/channels/blade55555/videos",
-	          "subscriptions": "https://api.twitch.tv/kraken/channels/blade55555/subscriptions",
-	          "follows": "https://api.twitch.tv/kraken/channels/blade55555/follows",
-	          "self": "https://api.twitch.tv/kraken/channels/blade55555",
-	          "chat": "https://api.twitch.tv/kraken/chat/blade55555"
-	        },
-	        "teams": [ ],
-	        "logo": "http://static-cdn.jtvnw.net/jtv_user_pictures/blade55555-profile_image-e551610be15ec896-300x300.png",
-	        "url": "http://www.twitch.tv/blade55555"
-	      },
-	      "preview": "http://static-cdn.jtvnw.net/previews-ttv/live_user_blade55555-320x200.jpg",
-	      "name": "live_user_blade55555",
-	      "_links": {
-	        "self": "https://api.twitch.tv/kraken/streams/blade55555"
-	      },
-	      "broadcaster": "fme"
-	    },
-	    {
-	      "game": "StarCraft II: Heart of the Swarm",
-	      "viewers": 2,
-	      "_id": 4989654544,
-	      "channel": {
-	        "game": "StarCraft II: Heart of the Swarm",
-	        "display_name": "Blade55555",
-	        "created_at": "2009-09-19T02:07:23Z",
-	        "status": "Starcraft 2 HOTS GM zerg",
-	        "updated_at": "2013-02-28T22:30:17Z",
-	        "mature": null,
-	        "_id": 8341905,
-	        "video_banner": "http://static-cdn.jtvnw.net/jtv_user_pictures/blade55555-channel_offline_image-3abeffa573a391d4-640x360.jpeg",
-	        "name": "blade55555",
-	        "banner": null,
-	        "background": null,
-	        "_links": {
-	          "editors": "https://api.twitch.tv/kraken/channels/blade55555/editors",
-	          "stream_key": "https://api.twitch.tv/kraken/channels/blade55555/stream_key",
-	          "commercial": "https://api.twitch.tv/kraken/channels/blade55555/commercial",
-	          "features": "https://api.twitch.tv/kraken/channels/blade55555/features",
-	          "videos": "https://api.twitch.tv/kraken/channels/blade55555/videos",
-	          "subscriptions": "https://api.twitch.tv/kraken/channels/blade55555/subscriptions",
-	          "follows": "https://api.twitch.tv/kraken/channels/blade55555/follows",
-	          "self": "https://api.twitch.tv/kraken/channels/blade55555",
-	          "chat": "https://api.twitch.tv/kraken/chat/blade55555"
-	        },
-	        "teams": [ ],
-	        "logo": "http://static-cdn.jtvnw.net/jtv_user_pictures/blade55555-profile_image-e551610be15ec896-300x300.png",
-	        "url": "http://www.twitch.tv/blade55555"
-	      },
-	      "preview": "http://static-cdn.jtvnw.net/previews-ttv/live_user_blade55555-320x200.jpg",
-	      "name": "live_user_blade55555",
-	      "_links": {
-	        "self": "https://api.twitch.tv/kraken/streams/blade55555"
-	      },
-	      "broadcaster": "fme"
-	    },
-	    {
-	      "game": "StarCraft II: Heart of the Swarm",
-	      "viewers": 2,
-	      "_id": 4989654544,
-	      "channel": {
-	        "game": "StarCraft II: Heart of the Swarm",
-	        "display_name": "Blade55555",
-	        "created_at": "2009-09-19T02:07:23Z",
-	        "status": "Starcraft 2 HOTS GM zerg",
-	        "updated_at": "2013-02-28T22:30:17Z",
-	        "mature": null,
-	        "_id": 8341905,
-	        "video_banner": "http://static-cdn.jtvnw.net/jtv_user_pictures/blade55555-channel_offline_image-3abeffa573a391d4-640x360.jpeg",
-	        "name": "blade55555",
-	        "banner": null,
-	        "background": null,
-	        "_links": {
-	          "editors": "https://api.twitch.tv/kraken/channels/blade55555/editors",
-	          "stream_key": "https://api.twitch.tv/kraken/channels/blade55555/stream_key",
-	          "commercial": "https://api.twitch.tv/kraken/channels/blade55555/commercial",
-	          "features": "https://api.twitch.tv/kraken/channels/blade55555/features",
-	          "videos": "https://api.twitch.tv/kraken/channels/blade55555/videos",
-	          "subscriptions": "https://api.twitch.tv/kraken/channels/blade55555/subscriptions",
-	          "follows": "https://api.twitch.tv/kraken/channels/blade55555/follows",
-	          "self": "https://api.twitch.tv/kraken/channels/blade55555",
-	          "chat": "https://api.twitch.tv/kraken/chat/blade55555"
-	        },
-	        "teams": [ ],
-	        "logo": "http://static-cdn.jtvnw.net/jtv_user_pictures/blade55555-profile_image-e551610be15ec896-300x300.png",
-	        "url": "http://www.twitch.tv/blade55555"
-	      },
-	      "preview": "http://static-cdn.jtvnw.net/previews-ttv/live_user_blade55555-320x200.jpg",
-	      "name": "live_user_blade55555",
-	      "_links": {
-	        "self": "https://api.twitch.tv/kraken/streams/blade55555"
-	      },
-	      "broadcaster": "fme"
-	    },
-	    {
-	      "game": "StarCraft II: Heart of the Swarm",
-	      "viewers": 2,
-	      "_id": 4989654544,
-	      "channel": {
-	        "game": "StarCraft II: Heart of the Swarm",
-	        "display_name": "Blade55555",
-	        "created_at": "2009-09-19T02:07:23Z",
-	        "status": "Starcraft 2 HOTS GM zerg",
-	        "updated_at": "2013-02-28T22:30:17Z",
-	        "mature": null,
-	        "_id": 8341905,
-	        "video_banner": "http://static-cdn.jtvnw.net/jtv_user_pictures/blade55555-channel_offline_image-3abeffa573a391d4-640x360.jpeg",
-	        "name": "blade55555",
-	        "banner": null,
-	        "background": null,
-	        "_links": {
-	          "editors": "https://api.twitch.tv/kraken/channels/blade55555/editors",
-	          "stream_key": "https://api.twitch.tv/kraken/channels/blade55555/stream_key",
-	          "commercial": "https://api.twitch.tv/kraken/channels/blade55555/commercial",
-	          "features": "https://api.twitch.tv/kraken/channels/blade55555/features",
-	          "videos": "https://api.twitch.tv/kraken/channels/blade55555/videos",
-	          "subscriptions": "https://api.twitch.tv/kraken/channels/blade55555/subscriptions",
-	          "follows": "https://api.twitch.tv/kraken/channels/blade55555/follows",
-	          "self": "https://api.twitch.tv/kraken/channels/blade55555",
-	          "chat": "https://api.twitch.tv/kraken/chat/blade55555"
-	        },
-	        "teams": [ ],
-	        "logo": "http://static-cdn.jtvnw.net/jtv_user_pictures/blade55555-profile_image-e551610be15ec896-300x300.png",
-	        "url": "http://www.twitch.tv/blade55555"
-	      },
-	      "preview": "http://static-cdn.jtvnw.net/previews-ttv/live_user_blade55555-320x200.jpg",
-	      "name": "live_user_blade55555",
-	      "_links": {
-	        "self": "https://api.twitch.tv/kraken/streams/blade55555"
-	      },
-	      "broadcaster": "fme"
-	    }
-
-	  ]
-	}
 //http://character-code.com/arrows-html-codes.php
 </script>
 <body id="root">
  <div id="wrapper">
- 	<!--
- 	<div id='results-panel' class="panel">
- 		<div id="results-count">
- 			<span>Total results: </span><span>123</span>
- 		</div>
- 		<div id="results-page-controls">
- 			<a href="#"><span>&#8676;</span></a>
- 			<a href="#"><span>&#8678;</span></a>
- 			<span>1/20</span>
- 			<a href="#"><span>&#8680;</span></a>
- 			<a href="#"><span>&#8677;</span></a>
- 		</div>
- 		<ul id="results-list">
- 			<li>
- 				<div><img src="http://static-cdn.jtvnw.net/previews-ttv/live_user_vinesauce-320x200.jpg" /></div>
- 				<div>
-	 				<p>(channel.status) Stream display name</p>
-	 				<p><span>(game) Super Mario RPG: Legend of the Seven Stars</span> - <span> (viewers) 659 viewers</span></p>
-	 				<p>Stream description Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus faucibus magna eget blandit mattis. Duis pretium ante sed luctus lacinia. Suspendisse sit amet mi sed nisl cursus auctor. Etiam semper mauris sit amet turpis elementum semper. Cras ut magna ut justo sagittis imperdiet.</p>
- 				</div>
- 			</li>
- 			<li>
- 				<div><img src="http://static-cdn.jtvnw.net/previews-ttv/live_user_vinesauce-320x200.jpg" /></div>
- 				<div>
-	 				<p>(channel.status) Stream display name</p>
-	 				<p><span>(game) Super Mario RPG: Legend of the Seven Stars</span> - <span> (viewers) 659 viewers</span></p>
-	 				<p>Stream description Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus faucibus magna eget blandit mattis. Duis pretium ante sed luctus lacinia. Suspendisse sit amet mi sed nisl cursus auctor. Etiam semper mauris sit amet turpis elementum semper. Cras ut magna ut justo sagittis imperdiet.</p>
- 				</div>
- 			</li>
- 			<li>
- 				<div><img src="http://static-cdn.jtvnw.net/previews-ttv/live_user_vinesauce-320x200.jpg" /></div>
- 				<div>
-	 				<p>(channel.status) Stream display name</p>
-	 				<p><span>(game) Super Mario RPG: Legend of the Seven Stars</span> - <span> (viewers) 659 viewers</span></p>
-	 				<p>Stream description Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus faucibus magna eget blandit mattis. Duis pretium ante sed luctus lacinia. Suspendisse sit amet mi sed nisl cursus auctor. Etiam semper mauris sit amet turpis elementum semper. Cras ut magna ut justo sagittis imperdiet.</p>
- 				</div>
- 			</li>
-
- 		</ul>
- 	</div>
-	!-->
+ 	
  </div>
 </body>
 </html>
