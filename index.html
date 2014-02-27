@@ -42,15 +42,8 @@
 		margin-bottom: 1.5em;
 	}
 
-	#results-list div:first-of-type {
-		/*width: 150px;*/
-		/*float: left;*/
-	}
-	#results-list div:last-of-type {
-	/*	width: 150px;
-		height: 100%;*/
-		/*float: right;*/
-	}
+	#results-list div:first-of-type {}
+	#results-list div:last-of-type {}
 	
 	#results-list div img {
 		width: 150px;
@@ -80,17 +73,8 @@
 	}
 	
 	KrakenSearchApp.prototype.buildSearchBar = function(){
-		var textFragment = '<input id="input-search" type="text" placeholder="Search query..." /><input type="submit" value="Search" />'
-		
-		var attrClass = document.createAttribute("class")
-		attrClass.value = "panel"
-		var attrId = document.createAttribute("id")
-		attrId.value = "search-panel"
-		var HTMLfragment = document.createDocumentFragment();
-		HTMLfragment.appendChild(document.createElement('DIV'))
-		HTMLfragment.childNodes[0].setAttributeNode(attrId)
-		HTMLfragment.childNodes[0].setAttributeNode(attrClass)
-		
+		var textFragment = '<input id="input-search" type="text" placeholder="Search query..." /><input type="submit" value="Search" />'		
+		var HTMLfragment = this.UtilCreateFragment('DIV', 'search-panel', 'panel')
 		HTMLfragment.childNodes[0].innerHTML = textFragment
 		this.root.appendChild(HTMLfragment)
 
@@ -108,7 +92,6 @@
 	KrakenSearchApp.prototype.searchAPI = function(term){
 		var baseURL = 'https://api.twitch.tv/kraken/search/streams'
 		var queryURL = baseURL + '?q="' + encodeURI(term) + '"'
-		console.log(queryURL)
 		var server = new AsyncModule()
 		/*the following object literal is not good becasue I'm explictly referencing a instance 
 		of the KrakenSearchApp() at the 'scope' key. This is a hack/patch to get the demo to work. This app is MEGA brittle now and I don't know how 
@@ -125,12 +108,9 @@
 
 	KrakenSearchApp.prototype.displaySearchResults = function(parentId, data){
 		var parent = document.getElementById(parentId)
-		
-		//Need to seperate these concerns by implmenting this while loop as utility function to empty the parent node and make it testable
 		this.UtilEmptyNode(parent)
-
 		data.streams.forEach(function(stream){
-			var textFragment = '<div><img src="' + stream.channel.logo+ '" /></div><div><p>' + stream.channel.status + '</p><p><span>' + stream.game + '</span> - <span>' + stream.viewers + ' viewers</span></p></div>'
+			var textFragment = '<div><img src="' + stream.channel.logo + '" /></div><div><p>' + stream.channel.status + '</p><p><span>' + stream.game + '</span> - <span>' + stream.viewers + ' viewers</span></p></div>'
 			var HTMLfragment = document.createDocumentFragment();
 			HTMLfragment.appendChild(document.createElement('LI'))
 			HTMLfragment.childNodes[0].innerHTML = textFragment
@@ -145,71 +125,66 @@
 		counterDisplayNode.innerHTML = newCount
 	}
 
-	KrakenSearchApp.prototype.UtilCreateNode = function(newCount){
-		var newNode
+	KrakenSearchApp.prototype.UtilCreateFragment = function(elementTag, nodeId, nodeClass){
+		//currently this only supports setting an ID attribute and/or a single class attribute
+		var HTMLfragment = document.createDocumentFragment();
+		HTMLfragment.appendChild(document.createElement(elementTag))
+		if(nodeClass){
+			var attrClass = document.createAttribute("class")
+			attrClass.value = nodeClass
+			HTMLfragment.childNodes[0].setAttributeNode(attrClass)
+		}
+		if(nodeId){
+			var attrId = document.createAttribute("id")
+			attrId.value = nodeId			
+			HTMLfragment.childNodes[0].setAttributeNode(attrId)
+		}
 
-		return newNode
+		return HTMLfragment
 	}
 
 	KrakenSearchApp.prototype.UtilEmptyNode = function(node){
-		//var node = document.getElementById(nodeId)
 		while (node.hasChildNodes()) {
 		    node.removeChild(node.lastChild);
 		}
 	}
 
-	KrakenSearchApp.prototype.buildResultsPanelContainer = function(){		
-		var attrClass = document.createAttribute("class")
-		attrClass.value = "panel"
-		var attrId = document.createAttribute("id")
-		attrId.value = "results-panel"
-		var HTMLfragment = document.createDocumentFragment();
-		HTMLfragment.appendChild(document.createElement('DIV'))
-		HTMLfragment.childNodes[0].setAttributeNode(attrId)
-		HTMLfragment.childNodes[0].setAttributeNode(attrClass)
+	KrakenSearchApp.prototype.buildResultsPanelContainer = function(){	
+		var HTMLfragment = this.UtilCreateFragment('DIV', 'results-panel', 'panel')	
+		// var attrClass = document.createAttribute("class")
+		// attrClass.value = "panel"
+		// var attrId = document.createAttribute("id")
+		// attrId.value = "results-panel"
+		// var HTMLfragment = document.createDocumentFragment();
+		// HTMLfragment.appendChild(document.createElement('DIV'))
+		// HTMLfragment.childNodes[0].setAttributeNode(attrId)
+		// HTMLfragment.childNodes[0].setAttributeNode(attrClass)
 		
 		this.root.appendChild(HTMLfragment)
-		this.buildResultsCountTemplate(attrId.value)
-		//this.buildResultsPageControlsTemplate(attrId.value)  //I can't properly implment this until I deal with cross-origin security
-		this.buildResultsListTemplate(attrId.value)
+		this.buildResultsCountTemplate('results-panel')
+		//this.buildResultsPageControlsTemplate('results-panel')  //I can't properly implment this until I deal with cross-origin security
+		this.buildResultsListTemplate('results-panel')
 	}
 
 	KrakenSearchApp.prototype.buildResultsCountTemplate = function(parentId){
-		var textFragment = '<span>Total results: </span><span>0</span>'
-		
-		var parent = document.getElementById(parentId)
-		var attrId = document.createAttribute("id")
-		attrId.value = "results-count"
-		var HTMLfragment = document.createDocumentFragment();
-		HTMLfragment.appendChild(document.createElement('DIV'))
-		HTMLfragment.childNodes[0].setAttributeNode(attrId)
-		
+		var textFragment = '<span>Total results: </span><span>0</span>'		
+		var parent = document.getElementById(parentId)		
+		var HTMLfragment = this.UtilCreateFragment('DIV', 'results-count')		
 		HTMLfragment.childNodes[0].innerHTML = textFragment
 		parent.appendChild(HTMLfragment)
 	}
 
 	KrakenSearchApp.prototype.buildResultsPageControlsTemplate = function(parentId, currentPage, maxPage, interval){
-		var textFragment = '<a href="#"><span>&#8676;</span></a><a href="#"><span>&#8678;</span></a><span>1/1</span><a href="#"><span>&#8680;</span></a><a href="#"><span>&#8677;</span></a>'
-		
+		var textFragment = '<a href="#"><span>&#8676;</span></a><a href="#"><span>&#8678;</span></a><span>1 / 1</span><a href="#"><span>&#8680;</span></a><a href="#"><span>&#8677;</span></a>'
 		var parent = document.getElementById(parentId)
-		var attrId = document.createAttribute("id")
-		attrId.value = "results-page-controls"
-		var HTMLfragment = document.createDocumentFragment();
-		HTMLfragment.appendChild(document.createElement('DIV'))
-		HTMLfragment.childNodes[0].setAttributeNode(attrId)
-		
+		var HTMLfragment = this.UtilCreateFragment('DIV', 'results-page-controls')
 		HTMLfragment.childNodes[0].innerHTML = textFragment
 		parent.appendChild(HTMLfragment)
 	}
 
 	KrakenSearchApp.prototype.buildResultsListTemplate = function(parentId){
 		var parent = document.getElementById(parentId)
-		var attrId = document.createAttribute("id")
-		attrId.value = "results-list"
-		var HTMLfragment = document.createDocumentFragment();
-		HTMLfragment.appendChild(document.createElement('UL'))
-		HTMLfragment.childNodes[0].setAttributeNode(attrId)
-		
+		var HTMLfragment = this.UtilCreateFragment('UL', 'results-list')
 		parent.appendChild(HTMLfragment)
 	}
 
