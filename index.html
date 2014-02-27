@@ -127,9 +127,7 @@
 		var parent = document.getElementById(parentId)
 		
 		//Need to seperate these concerns by implmenting this while loop as utility function to empty the parent node and make it testable
-		while (parent.hasChildren) {
-		    myNode.removeChild(myNode.lastChild);
-		}
+		this.UtilEmptyNode(parent)
 
 		data.streams.forEach(function(stream){
 			var textFragment = '<div><img src="' + stream.channel.logo+ '" /></div><div><p>' + stream.channel.status + '</p><p><span>' + stream.game + '</span> - <span>' + stream.viewers + ' viewers</span></p></div>'
@@ -147,6 +145,19 @@
 		counterDisplayNode.innerHTML = newCount
 	}
 
+	KrakenSearchApp.prototype.UtilCreateNode = function(newCount){
+		var newNode
+
+		return newNode
+	}
+
+	KrakenSearchApp.prototype.UtilEmptyNode = function(node){
+		//var node = document.getElementById(nodeId)
+		while (node.hasChildNodes()) {
+		    node.removeChild(node.lastChild);
+		}
+	}
+
 	KrakenSearchApp.prototype.buildResultsPanelContainer = function(){		
 		var attrClass = document.createAttribute("class")
 		attrClass.value = "panel"
@@ -159,12 +170,12 @@
 		
 		this.root.appendChild(HTMLfragment)
 		this.buildResultsCountTemplate(attrId.value)
-		//this.buildResultsPageControlsTemplate(attrId.value)
+		//this.buildResultsPageControlsTemplate(attrId.value)  //I can't properly implment this until I deal with cross-origin security
 		this.buildResultsListTemplate(attrId.value)
 	}
 
 	KrakenSearchApp.prototype.buildResultsCountTemplate = function(parentId){
-		var textFragment = '<span>Total results: </span><span>123</span>'
+		var textFragment = '<span>Total results: </span><span>0</span>'
 		
 		var parent = document.getElementById(parentId)
 		var attrId = document.createAttribute("id")
@@ -178,7 +189,7 @@
 	}
 
 	KrakenSearchApp.prototype.buildResultsPageControlsTemplate = function(parentId, currentPage, maxPage, interval){
-		var textFragment = '<a href="#"><span>&#8676;</span></a><a href="#"><span>&#8678;</span></a><span>1/20</span><a href="#"><span>&#8680;</span></a><a href="#"><span>&#8677;</span></a>'
+		var textFragment = '<a href="#"><span>&#8676;</span></a><a href="#"><span>&#8678;</span></a><span>1/1</span><a href="#"><span>&#8680;</span></a><a href="#"><span>&#8677;</span></a>'
 		
 		var parent = document.getElementById(parentId)
 		var attrId = document.createAttribute("id")
@@ -249,7 +260,7 @@
 		}
 
 		return {
-			load: load,
+			load: STUBload,
 			get: get
 		}
 	}
