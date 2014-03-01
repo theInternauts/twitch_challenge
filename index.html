@@ -92,14 +92,11 @@
 
 	KrakenSearchApp.prototype.searchAPI = function(term){
 		var baseURL = 'https://api.twitch.tv/kraken/search/streams'
-		var queryURL = baseURL + '?q="' + encodeURI(term) + '"'
+		var queryURL = baseURL + '?q=' + encodeURI('"' + term + '"')
 		var server = new AsyncModule()
-		/*the following object literal is not good becasue I'm explictly referencing a instance 
-		of the KrakenSearchApp() at the 'scope' key. This is a hack/patch to get the demo to work. This app is MEGA brittle now and I don't know how 
-		to fix it */
 		var config = {
 			scope: this,
-			callback: KrakenSearchApp.prototype.displaySearchResults,
+			callback: this.displaySearchResults,
 			arguments: ['results-list']
 		}
 		
