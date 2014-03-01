@@ -3,6 +3,8 @@ twitch_challenge
 
 twitch.tv api code challenge
 
+## The original submission can be found in a branch called ["original-submission"] (https://github.com/theInternauts/twitch_challenge/tree/original-submission)
+
 ###added after the dealine submission
 * better error handling for the Async module
 * Used .bind() to handle executuion scope more gracefully and remove the explicit reference to the app.  (that was REALLY bad)
