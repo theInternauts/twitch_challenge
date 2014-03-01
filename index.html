@@ -58,6 +58,13 @@
 	}
 	#results-list p span { font-style: italic; }
 
+	.msg-error {
+		color: #F00;
+		font-weight: bold;
+		font-style: italic;
+		padding-left: 1em;
+	}
+
 </style>
 <script type="text/javascript" src="fakeData.js"></script>
 <script type="text/javascript">
@@ -97,7 +104,8 @@
 		var config = {
 			scope: this,
 			callback: this.displaySearchResults,
-			arguments: ['results-list']
+			arguments: ['results-list'],
+			onError: this.AsyncErrorHandler
 		}
 		
 		//Asyc call to twitch with 'term'
@@ -177,6 +185,20 @@
 		parent.appendChild(HTMLfragment)
 	}
 
+	KrakenSearchApp.prototype.AsyncErrorHandler = function(errorMessage){
+		var HTMLfragment = this.UtilCreateFragment('DIV', 'msg-async', 'msg-error')
+		var newNode = HTMLfragment.childNodes[0]
+		newNode.innerHTML = '(Click to remove) Error: '+ errorMessage
+		this.root.appendChild(HTMLfragment)
+		this.root.insertBefore(newNode, this.root.childNodes[0])
+		var removalHandler = function(event){			
+			event.preventDefault()
+			this.removeEventListener('click', removalHandler, false);
+			this.remove()
+		}
+		newNode.addEventListener('click', removalHandler, false)
+	}
+
 	AsyncModule = function(){
 		var xhr = new XMLHttpRequest()
 
@@ -212,10 +234,13 @@
 			        	if(options.callback){
 							options.arguments ? options.arguments.push(JSON.parse(xhr.responseText)) : null
 							options.callback.apply(options.scope, options.arguments)
-						}
-			        	return JSON.parse(xhr.responseText)
+						}			        	
 			        } else {
-			            alert('Error: '+ xhr.status)
+			        	if(options.onError){
+							options.onError.apply(options.scope, [xhr.status])
+						} else {							
+				            alert('Error: '+ xhr.status)
+						}
 			        }
 			    }
 			}
@@ -224,7 +249,7 @@
 		}
 
 		return {
-			load: STUBload,
+			load: load,
 			get: get
 		}
 	}
