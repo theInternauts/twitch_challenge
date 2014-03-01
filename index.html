@@ -68,10 +68,10 @@
 </style>
 <script type="text/javascript" src="fakeData.js"></script>
 <script type="text/javascript">
-	function KrakenSearchApp(id){
+	function KrakenSearchApp(id, options){
 		this.root = document.getElementById(id)
+		this.baseURL = 'https://api.twitch.tv/kraken/search/streams' || options.baseURL
 		this.init()
-		this.obj	
 	}
 
 	KrakenSearchApp.prototype.init = function(){
@@ -99,7 +99,7 @@
 
 	KrakenSearchApp.prototype.searchAPI = function(term){
 		var baseURL = 'https://api.twitch.tv/kraken/search/streams'
-		var queryURL = baseURL + '?q=' + encodeURI('"' + term + '"')
+		var queryURL = this.baseURL + '?q=' + encodeURI('"' + term + '"')
 		var server = new AsyncModule()
 		var config = {
 			scope: this,
