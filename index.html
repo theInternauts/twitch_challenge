@@ -148,16 +148,7 @@
 	}
 
 	KrakenSearchApp.prototype.buildResultsPanelContainer = function(){	
-		var HTMLfragment = this.UtilCreateFragment('DIV', 'results-panel', 'panel')	
-		// var attrClass = document.createAttribute("class")
-		// attrClass.value = "panel"
-		// var attrId = document.createAttribute("id")
-		// attrId.value = "results-panel"
-		// var HTMLfragment = document.createDocumentFragment();
-		// HTMLfragment.appendChild(document.createElement('DIV'))
-		// HTMLfragment.childNodes[0].setAttributeNode(attrId)
-		// HTMLfragment.childNodes[0].setAttributeNode(attrClass)
-		
+		var HTMLfragment = this.UtilCreateFragment('DIV', 'results-panel', 'panel')			
 		this.root.appendChild(HTMLfragment)
 		this.buildResultsCountTemplate('results-panel')
 		//this.buildResultsPageControlsTemplate('results-panel')  //I can't properly implment this until I deal with cross-origin security
