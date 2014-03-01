@@ -63,7 +63,8 @@
 <script type="text/javascript">
 	function KrakenSearchApp(id){
 		this.root = document.getElementById(id)
-		this.init()		
+		this.init()
+		this.obj	
 	}
 
 	KrakenSearchApp.prototype.init = function(){
@@ -82,11 +83,11 @@
 	}
 
 	KrakenSearchApp.prototype.setSearchListeners = function(){
-		document.getElementById('input-search').addEventListener('keyup', this.searchHandler, true)
+		document.getElementById('input-search').addEventListener('keyup', this.searchHandler.bind(this), true)
 	}
 
 	KrakenSearchApp.prototype.searchHandler = function(event){
-		KrakenSearchApp.prototype.searchAPI.call(KrakenSearchApp, event.target.value)		
+		this.searchAPI(event.target.value)	
 	}
 
 	KrakenSearchApp.prototype.searchAPI = function(term){
@@ -97,7 +98,7 @@
 		of the KrakenSearchApp() at the 'scope' key. This is a hack/patch to get the demo to work. This app is MEGA brittle now and I don't know how 
 		to fix it */
 		var config = {
-			scope: app,
+			scope: this,
 			callback: KrakenSearchApp.prototype.displaySearchResults,
 			arguments: ['results-list']
 		}
