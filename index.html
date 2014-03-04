@@ -112,7 +112,7 @@
 		server.loadJSONP(queryURL, config)
 	}
 
-	KrakenSearchApp.prototype.displaySearchResults = function(parentId, data){
+	KrakenSearchApp.prototype.displaySearchResults = function(data, parentId){
 		var parent = document.getElementById(parentId)
 		this.UtilEmptyNode(parent)
 		data.streams.forEach(function(stream){
@@ -230,14 +230,9 @@
 				var args
 				response = event
 				responseText = event.detail.JSONPdata
-				if(options.arguments != null){
-					args = options.arguments
-				} else {
-					args = []
-				}
-
-				args.push(responseText)
-
+				args = [responseText]
+				args = args.concat(options.arguments)
+				
 				if (options.callback != null && options.scope != null){
 					options.callback.apply(options.scope, args)
 				}
