@@ -109,7 +109,7 @@
 		}
 		
 		//Asyc call to twitch with 'term'
-		server.load(queryURL, config)
+		server.loadJSONP(queryURL, config)
 	}
 
 	KrakenSearchApp.prototype.displaySearchResults = function(parentId, data){
@@ -227,10 +227,19 @@
 
 		function handlerCustomJSONPEvent(options){
 			var finalHandler = function(event){
+				var args
 				response = event
 				responseText = event.detail.JSONPdata
+				if(options.arguments != null){
+					args = options.arguments
+				} else {
+					args = []
+				}
+
+				args.push(responseText)
+
 				if (options.callback != null && options.scope != null){
-					options.callback.call(options.scope, responseText)
+					options.callback.apply(options.scope, args)
 				}
 				//these next two lines may casue issues when there are multiple instances of the this module making JSONP requests
 				//delete window.handlerAsyncModule //potential RACE CONDITION if multiple events fired quickly, as well
