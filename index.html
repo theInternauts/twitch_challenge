@@ -108,7 +108,7 @@
 		this.currentPage = 1
 		this.resultsPerPage = 10
 		this.totalResults = 0
-		this.searchTerm = 'mario'
+		this.searchTerm = ''
 		this.queryString = ''
 
 		this.init()
@@ -160,10 +160,10 @@
 	}
 
 	KrakenSearchApp.prototype.buildQueryString = function(){
-		var limit = '?limit=' + this.resultsPerPage
-		var offset = '&offset=' + ((this.currentPage-1)*this.resultsPerPage)
-		var query = '&q=%22' + this.searchTerm + '%22'
-		console.log(limit, ' | ', offset, ' | ', query)
+		var limit = '?limit=' + encodeURI(this.resultsPerPage)
+		var offset = '&offset=' + encodeURI(((this.currentPage-1)*this.resultsPerPage))
+		var query = '&q=%22' + encodeURI(this.searchTerm) + '%22'
+		// console.log(limit, ' | ', offset, ' | ', query)
 		this.queryString = this.baseURL.concat(limit, offset, query)
 		console.log(this.queryString)
 	}
@@ -177,7 +177,7 @@
 	}
 	
 	KrakenSearchApp.prototype.buildSearchBar = function(){
-		var textFragment = '<input id="input-search" type="text" placeholder="Search query..." /><input type="submit" value="Search" />'		
+		var textFragment = '<input id="input-search" type="text" placeholder="Search query..." /><input type="submit" value="Search" id="btn-input-search-button"/>'		
 		var HTMLfragment = this.UtilCreateFragment('DIV', 'search-panel', 'panel')
 		HTMLfragment.childNodes[0].innerHTML = textFragment
 		this.root.appendChild(HTMLfragment)
@@ -187,6 +187,7 @@
 
 	KrakenSearchApp.prototype.setSearchListeners = function(){
 		document.getElementById('input-search').addEventListener('keyup', this.searchHandler.bind(this), true)
+		document.getElementById('btn-input-search-button').addEventListener('click', this.searchAPI.bind(this), true)
 	}
 
 	KrakenSearchApp.prototype.searchHandler = function(event){
@@ -195,7 +196,7 @@
 	}
 
 	KrakenSearchApp.prototype.searchAPI = function(term){
-		term != null? this.searchTerm = term : null
+		(term != null && typeof(term) == 'string') ? this.searchTerm = term : null
 		this.buildQueryString()
 		var server = new AsyncModule()
 		var config = {
