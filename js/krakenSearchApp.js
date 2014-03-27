@@ -1,5 +1,3 @@
-krakenSearchApp.js
-
 function KrakenSearchApp(id, options){
 		this.root = document.getElementById(id)
 		this.baseURL = 'https://api.twitch.tv/kraken/search/streams' || options.baseURL
