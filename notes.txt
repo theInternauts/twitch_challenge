@@ -1,0 +1,22 @@
+Model
+* json obj with only the data I want
+
+
+Controller
+* makes async calls to contruct models
+* call views, passes them the models, and assigns the views to variables
+* assign listener for events handle events
+* pagination utils go here to make async calls and update the models
+*
+
+View
+------need generic VIEW with utilities
+----create 3 views with specialized utils
+--this.buildSearchBar()
+--this.buildResultsPanelContainer()
+* iterate over models
+* create DOM nodes?
+* listen for events and trigger events
+* pagination click a button, fire an event, listen for response event,display new data (from the updated model)
+* need methods to clear DOM when model is updated.  (listen for event, delete old model, re-load new model)
++++ need to lookup in MDN the generic handle(r) syntax to catch all events and test/handle them via a massive switch

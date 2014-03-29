@@ -2,17 +2,20 @@
 <html>
 <head>
 	<title>Sony Challenge&mdash;by: Christopher "Cricket" Wallace</title>
-	<style type="text/css" src="css/app.css"></style>
+	<link rel="stylesheet" type="text/css" href="css/app.css">
 </head>
 
 <script type="text/javascript" src="js/fakeData.js"></script>
 <script type="text/javascript" src="js/asyncModule.js"></script>
-<script type="text/javascript" src="js/krakenSearchApp.js"></script>
+<!-- <script type="text/javascript" src="js/krakenSearchApp.js"></script> -->
+<script type="text/javascript" src="app.js"></script>
 <script type="text/javascript">
 	
 	window.onload = function(){
 		//new KrakenSearchApp('wrapper')
-		app = new KrakenSearchApp('wrapper')
+		// app = new KrakenSearchApp('wrapper')
+		app = new Controller()
+		app.init()	
 	}
 </script>
 <body id="root">
