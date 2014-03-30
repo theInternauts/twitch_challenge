@@ -5,24 +5,17 @@
 	<link rel="stylesheet" type="text/css" href="css/app.css">
 </head>
 
-<script type="text/javascript" src="js/fakeData.js"></script>
 <script type="text/javascript" src="js/asyncModule.js"></script>
 <script type="text/javascript" src="js/utils.js"></script>
 <script type="text/javascript" src="js/view.js"></script>
-<!-- <script type="text/javascript" src="js/krakenSearchApp.js"></script> -->
+<script type="text/javascript" src="js/model.js"></script>
 <script type="text/javascript" src="app.js"></script>
-<script type="text/javascript">
-	
+<script type="text/javascript">	
 	window.onload = function(){
-		//new KrakenSearchApp('wrapper')
-		// app = new KrakenSearchApp('wrapper')
-		app = new Controller()
-		app.init()	
+		new Controller()
 	}
 </script>
 <body id="root">
- <div id="wrapper">
- 	
- </div>
+ <div id="wrapper"></div>
 </body>
 </html>
