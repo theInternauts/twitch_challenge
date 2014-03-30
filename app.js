@@ -93,11 +93,12 @@ Controller.prototype.init = function(){
 		parentId: 'results-panel'
 	}).init()
 
-	this.resultsListView = new View({
+	this.resultsListView = new ResultsListView({
 		rootTagName: 'UL',
 		attributes: { id: 'results-list' },
 		parentId: 'results-panel'
 	}).init()
+	this.resultsListView.setEventListeners()
 
 	this.setEventListeners()
 	
@@ -145,3 +146,28 @@ function ResultsCountView(options){
 
 ResultsCountView.prototype = Object.create(View.prototype)
 ResultsCountView.prototype.constructor = ResultsCountView
+
+
+function ResultsListView(options){
+	View.call(this,options)
+
+	this.setEventListeners = function(){
+		this.parent.addEventListener("queryResults", this.updateDisplayList.bind(this), false)
+	}
+
+	this.updateDisplayList = function(e){
+		UTILS.emptyNode(this.root)
+		var root = this.root
+		e.detail.collection.forEach(function(stream){
+			var textFragment = '<div><img src="' + stream.channel.logo + '" /></div><div><p>' + stream.channel.status + '</p><p><span>' + stream.game + '</span> - <span>' + stream.viewers + ' viewers</span></p></div>'
+			var HTMLfragment = document.createDocumentFragment();
+			HTMLfragment.appendChild(document.createElement('LI'))
+			HTMLfragment.childNodes[0].innerHTML = textFragment
+			root.appendChild(HTMLfragment)
+		})
+	}
+
+}
+
+ResultsListView.prototype = Object.create(View.prototype)
+ResultsListView.prototype.constructor = ResultsListView
