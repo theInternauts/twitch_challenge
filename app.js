@@ -20,12 +20,20 @@ function Controller(options){
 		var server = new AsyncModule()
 		var config = {
 			scope: this,
-			callback: function(data){ console.log("Data: ", data)},
+			callback: this.searchSuccessHandler,
 			arguments: ['results-list'],
 			onError: this.asyncErrorHandler
 		}
 		
 		server.loadJSONP(this.queryString, config)
+	}
+
+	this.searchSuccessHandler = function(data){
+		// console.log("Data: ", data)
+		this.totalResults = data._total
+		var customEvent = new CustomEvent("queryResults", { detail: { paging: { total: this.totalResults, currentPage: this.currentPage, maxNumberOfPages: this.maxNumberOfPages() }, collection: data.streams }})
+		this.resultsPanelView.root.dispatchEvent(customEvent)
+		// console.log(customEvent)
 	}
 
 	this.buildQueryString = function(){
@@ -114,11 +122,6 @@ function SearchBarPanelView(options){
 		// console.log("this: ", this)
 		// console.log("customEvent",  customEvent)
 	}
-
-	
-
-	// this.setSearchListeners()
-
 }
 
 Object.create(View.prototype)
