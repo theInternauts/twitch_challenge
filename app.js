@@ -63,7 +63,7 @@ function Controller(options){
 		var query = '&q=%22' + encodeURI(this.searchTerm) + '%22'
 		// console.log(limit, ' | ', offset, ' | ', query)
 		this.queryString = this.baseURL.concat(limit, offset, query)
-		console.log(this.queryString)
+		// console.log(this.queryString)
 	}
 
 	this.maxNumberOfPages = function(){
