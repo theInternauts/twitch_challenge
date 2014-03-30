@@ -36,6 +36,25 @@ function Controller(options){
 		// console.log(customEvent)
 	}
 
+	this.paginationClickHandler = function(e){
+		e.preventDefault()
+		switch(event.detail.btn){
+			case 'btn-pg-first':
+				this.currentPage = 1
+			break
+			case 'btn-pg-previous':
+				this.currentPage > 1 ? this.currentPage-- : null
+			break
+			case 'btn-pg-next':
+				this.currentPage < this.maxNumberOfPages() ? this.currentPage++ : this.currentPage = 1
+			break
+			case 'btn-pg-last':
+				this.currentPage = this.maxNumberOfPages()
+			break				
+		}
+		this.searchAPI()
+	}
+
 	this.buildQueryString = function(){
 		var limit = '?limit=' + encodeURI(this.resultsPerPage)
 		var offset = '&offset=' + encodeURI(((this.currentPage-1)*this.resultsPerPage))
@@ -67,62 +86,64 @@ function Controller(options){
 		}
 		newNode.addEventListener('click', removalHandler, false)
 	}
+
+	this.setEventListeners = function(){
+		this.searchBarPanelView.root.addEventListener('searchQuery', this.searchHandler.bind(this), false)
+		this.resultsPaginationControlsView.root.addEventListener('pagingEvent', this.paginationClickHandler.bind(this), false)
+	}
+
+	this.init = function(){
+		this.searchBarPanelView = new SearchBarPanelView({
+			textFragment: '<input id="input-search" type="text" placeholder="Search query..." /><input type="submit" value="Search" id="btn-input-search-button"/>',		
+			attributes: { id: 'search-panel', class: 'panel' }
+		}).init()
+		this.searchBarPanelView.setEventListeners()
+
+		this.resultsPanelView = new View({
+			attributes: { id: 'results-panel', class: 'panel' }
+		}).init()
+		
+		this.resultsCountView = new	ResultsCountView({
+			textFragment: '<span>Total results: </span><span>0</span>',
+			attributes: { id: 'results-count' },
+			parentId: 'results-panel'
+		}).init()
+		this.resultsCountView.setEventListeners()
+		
+		this.resultsPaginationControlsView = new ResultsPaginationControlsView({
+			textFragment: '<a href="#" id="btn-pg-first">&#8647;</a><a href="#" id="btn-pg-previous">&#8678;</a><span id="display-pg">1 / 1</span><a href="#" id="btn-pg-next">&#8680;</a><a href="#" id="btn-pg-last">&#8649;</a>',
+			attributes: { id: 'results-page-controls' },
+			parentId: 'results-panel'
+		}).init()
+		this.resultsPaginationControlsView.setEventListeners()
+
+		this.resultsListView = new ResultsListView({
+			rootTagName: 'UL',
+			attributes: { id: 'results-list' },
+			parentId: 'results-panel'
+		}).init()
+		this.resultsListView.setEventListeners()
+
+		this.setEventListeners()
+		
+	}
 }
 
-Controller.prototype.init = function(){
-	this.searchBarPanelView = new SearchBarPanelView({
-		textFragment: '<input id="input-search" type="text" placeholder="Search query..." /><input type="submit" value="Search" id="btn-input-search-button"/>',		
-		attributes: { id: 'search-panel', class: 'panel' }
-	}).init()
-	this.searchBarPanelView.setSearchListeners()
 
-	this.resultsPanelView = new View({
-		attributes: { id: 'results-panel', class: 'panel' }
-	}).init()
-	
-	this.resultsCountView = new	ResultsCountView({
-		textFragment: '<span>Total results: </span><span>0</span>',
-		attributes: { id: 'results-count' },
-		parentId: 'results-panel'
-	}).init()
-	this.resultsCountView.setEventListeners()
-	
-	this.resultsPaginationControlsView = new	View({
-		textFragment: '<a href="#" id="btn-pg-first">&#8647;</a><a href="#" id="btn-pg-previous">&#8678;</a><span id="display-pg">1 / 1</span><a href="#" id="btn-pg-next">&#8680;</a><a href="#" id="btn-pg-last">&#8649;</a>',
-		attributes: { id: 'results-page-controls' },
-		parentId: 'results-panel'
-	}).init()
-
-	this.resultsListView = new ResultsListView({
-		rootTagName: 'UL',
-		attributes: { id: 'results-list' },
-		parentId: 'results-panel'
-	}).init()
-	this.resultsListView.setEventListeners()
-
-	this.setEventListeners()
-	
-}
-
-Controller.prototype.setEventListeners = function(){
-	this.searchBarPanelView.root.addEventListener('searchQuery', this.searchHandler.bind(this), false)
-}
 
 
 
 function SearchBarPanelView(options){
 	View.call(this,options)
 
-	this.setSearchListeners = function(){
+	this.setEventListeners = function(){
 		document.getElementById('input-search').addEventListener('keyup', this.broadcastEvent.bind(this), true)
 		document.getElementById('btn-input-search-button').addEventListener('click', this.broadcastEvent.bind(this), true)
 	}
 
-	this.broadcastEvent = function(event){
+	this.broadcastEvent = function(e){
 		var customEvent = new CustomEvent("searchQuery", { detail: { searchTerm: document.getElementById('input-search').value }})
 		this.root.dispatchEvent(customEvent)
-		// console.log("this: ", this)
-		// console.log("customEvent",  customEvent)
 	}
 }
 
@@ -171,3 +192,27 @@ function ResultsListView(options){
 
 ResultsListView.prototype = Object.create(View.prototype)
 ResultsListView.prototype.constructor = ResultsListView
+
+
+function ResultsPaginationControlsView(options){
+	View.call(this,options)
+
+	this.setEventListeners = function(){
+		this.root.addEventListener('click', this.broadcastEvent.bind(this), true)
+		this.parent.addEventListener('queryResults', this.updatePaginationDisplay.bind(this), true)
+	}
+
+	this.broadcastEvent = function(e){
+		var customEvent = new CustomEvent("pagingEvent", { detail: { btn: e.target.id }})
+		this.root.dispatchEvent(customEvent)
+	}
+
+	this.updatePaginationDisplay = function(e){
+		var display = document.getElementById('display-pg')
+		display.innerHTML = e.detail.paging.currentPage + ' / ' + e.detail.paging.maxNumberOfPages
+	}
+}
+
+ResultsPaginationControlsView.prototype = Object.create(View.prototype)
+ResultsPaginationControlsView.prototype.constructor = ResultsPaginationControlsView
+
