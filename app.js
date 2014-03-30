@@ -29,9 +29,11 @@ function Controller(options){
 	}
 
 	this.searchSuccessHandler = function(data){
-		// console.log("Data: ", data)
-		this.totalResults = data._total
-		var customEvent = new CustomEvent("queryResults", { detail: { paging: { total: this.totalResults, currentPage: this.currentPage, maxNumberOfPages: this.maxNumberOfPages() }, collection: data.streams }})
+		var model = new Model({ currentPage: this.currentPage, maxNumberOfPages: this.maxNumberOfPages(), data: data})
+		// console.log("Model: ", model)
+		//this may be incorret usage here
+		this.totalResults = model.paging.total
+		var customEvent = new CustomEvent("queryResults", { detail: model })
 		this.resultsPanelView.root.dispatchEvent(customEvent)
 		// console.log(customEvent)
 	}
@@ -180,7 +182,7 @@ function ResultsListView(options){
 		UTILS.emptyNode(this.root)
 		var root = this.root
 		e.detail.collection.forEach(function(stream){
-			var textFragment = '<div><img src="' + stream.channel.logo + '" /></div><div><p>' + stream.channel.status + '</p><p><span>' + stream.game + '</span> - <span>' + stream.viewers + ' viewers</span></p></div>'
+			var textFragment = '<div><img src="' + stream.logo + '" /></div><div><p>' + stream.status + '</p><p><span>' + stream.game + '</span> - <span>' + stream.viewers + ' viewers</span></p></div>'
 			var HTMLfragment = document.createDocumentFragment();
 			HTMLfragment.appendChild(document.createElement('LI'))
 			HTMLfragment.childNodes[0].innerHTML = textFragment
@@ -215,4 +217,24 @@ function ResultsPaginationControlsView(options){
 
 ResultsPaginationControlsView.prototype = Object.create(View.prototype)
 ResultsPaginationControlsView.prototype.constructor = ResultsPaginationControlsView
+
+
+function Model(options){
+	var that = this
+	this.paging = {
+		total: options.data._total,
+		currentPage: options.currentPage,
+		maxNumberOfPages: options.maxNumberOfPages 
+	}
+
+	this.collection = []
+	options.data.streams.forEach(function(stream){
+		var tempObj = {}
+		tempObj.logo = stream.channel.logo
+		tempObj.status = stream.channel.status
+		tempObj.game = stream.game
+		tempObj.viewers = stream.viewers
+		that.collection.push(tempObj)
+	})
+}
 
