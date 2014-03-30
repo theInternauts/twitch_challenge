@@ -80,11 +80,12 @@ Controller.prototype.init = function(){
 		attributes: { id: 'results-panel', class: 'panel' }
 	}).init()
 	
-	this.resultsCountView = new	View({
+	this.resultsCountView = new	ResultsCountView({
 		textFragment: '<span>Total results: </span><span>0</span>',
 		attributes: { id: 'results-count' },
 		parentId: 'results-panel'
 	}).init()
+	this.resultsCountView.setEventListeners()
 	
 	this.resultsPaginationControlsView = new	View({
 		textFragment: '<a href="#" id="btn-pg-first">&#8647;</a><a href="#" id="btn-pg-previous">&#8678;</a><span id="display-pg">1 / 1</span><a href="#" id="btn-pg-next">&#8680;</a><a href="#" id="btn-pg-last">&#8649;</a>',
@@ -124,6 +125,23 @@ function SearchBarPanelView(options){
 	}
 }
 
-Object.create(View.prototype)
+SearchBarPanelView.prototype = Object.create(View.prototype)
 SearchBarPanelView.prototype.constructor = SearchBarPanelView
 
+
+function ResultsCountView(options){
+	View.call(this,options)
+
+	this.setEventListeners = function(){
+		this.parent.addEventListener("queryResults", this.updateResultsCount.bind(this), false)
+	}
+
+	this.updateResultsCount = function(e){
+		var counterDisplayNode = document.getElementById('results-count').childNodes[1]
+		counterDisplayNode.innerHTML = e.detail.paging.total
+	}
+
+}
+
+ResultsCountView.prototype = Object.create(View.prototype)
+ResultsCountView.prototype.constructor = ResultsCountView
